@@ -1,0 +1,9 @@
+src-tauri/target/
+src-tauri/runtime/*.exe
+src-tauri/runtime/*.dll
+src-tauri/runtime/*LICENSE*
+src-tauri/icons/
+node_modules/
+*.db
+*.db-shm
+*.db-wal

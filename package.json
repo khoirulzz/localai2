@@ -1,0 +1,13 @@
+{
+  "name": "nalaro-ai-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "tauri": "tauri",
+    "build": "tauri build",
+    "check": "node --check web/app.js"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.0"
+  }
+}
