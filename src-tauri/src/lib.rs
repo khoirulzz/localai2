@@ -38,14 +38,14 @@ fn runtime(app:&AppHandle)->Result<PathBuf,String>{
 }
 fn all_models(db:&Connection)->Result<Vec<Model>,String>{
     let mut stmt=db.prepare("SELECT id,name,path,bytes,added_at FROM models ORDER BY added_at DESC").map_err(error)?;
-    stmt.query_map([],|r|Ok(Model{id:r.get(0)?,name:r.get(1)?,path:r.get(2)?,bytes:r.get(3)?,added_at:r.get(4)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error)
+    let rows=stmt.query_map([],|r|Ok(Model{id:r.get(0)?,name:r.get(1)?,path:r.get(2)?,bytes:r.get(3)?,added_at:r.get(4)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error);rows
 }
 fn get_model(db:&Connection,id:&str)->Result<Model,String>{
     db.query_row("SELECT id,name,path,bytes,added_at FROM models WHERE id=?",[id],|r|Ok(Model{id:r.get(0)?,name:r.get(1)?,path:r.get(2)?,bytes:r.get(3)?,added_at:r.get(4)?})).map_err(error)
 }
 fn all_conversations(db:&Connection)->Result<Vec<Conversation>,String>{
     let mut stmt=db.prepare("SELECT id,title,model_id,updated_at FROM conversations ORDER BY updated_at DESC").map_err(error)?;
-    stmt.query_map([],|r|Ok(Conversation{id:r.get(0)?,title:r.get(1)?,model_id:r.get(2)?,updated_at:r.get(3)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error)
+    let rows=stmt.query_map([],|r|Ok(Conversation{id:r.get(0)?,title:r.get(1)?,model_id:r.get(2)?,updated_at:r.get(3)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error);rows
 }
 #[tauri::command]
 fn bootstrap(app:AppHandle,state:State<'_,AppState>)->Result<Value,String>{
@@ -89,7 +89,7 @@ async fn import_model(app:AppHandle,state:State<'_,AppState>)->Result<Option<Mod
             let _=event_app.emit("model:progress",json!({"id":event_id,"copied":total,"total":total}));
             Ok(total as i64)
         })();
-        if copy.is_err(){let _=fs::remove_file(&part)}
+        if copy.is_err(){let _=fs::remove_file(&part);}
         copy
     }).await.map_err(error)??;
     let saved=Model{id:id.clone(),name,path:destdir.join("model.gguf").to_string_lossy().into_owned(),bytes:size,added_at:now()};
@@ -177,7 +177,7 @@ fn delete_conversation(state:State<'_,AppState>,id:String)->Result<(),String>{
 fn get_messages(state:State<'_,AppState>,conversation_id:String)->Result<Vec<Message>,String>{
     let db=state.db.lock().map_err(error)?;
     let mut stmt=db.prepare("SELECT id,conversation_id,role,content,thinking,status,created_at,stats_json FROM messages WHERE conversation_id=? ORDER BY created_at,id").map_err(error)?;
-    stmt.query_map([conversation_id],|r|Ok(Message{id:r.get(0)?,conversation_id:r.get(1)?,role:r.get(2)?,content:r.get(3)?,thinking:r.get(4)?,status:r.get(5)?,created_at:r.get(6)?,stats_json:r.get(7)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error)
+    let rows=stmt.query_map([conversation_id],|r|Ok(Message{id:r.get(0)?,conversation_id:r.get(1)?,role:r.get(2)?,content:r.get(3)?,thinking:r.get(4)?,status:r.get(5)?,created_at:r.get(6)?,stats_json:r.get(7)?})).map_err(error)?.collect::<Result<_,_>>().map_err(error);rows
 }
 #[tauri::command]
 fn save_message(state:State<'_,AppState>,message:Message)->Result<(),String>{
